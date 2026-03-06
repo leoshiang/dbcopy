@@ -1,0 +1,65 @@
+project:
+  type: book
+  output-dir: _book
+
+book:
+  title: "DbCopy：資料庫複製工具"
+  author: "向皓田"
+  date: last-modified
+  language: zh-Hant
+  chapters:
+    - index.md
+    - Chapter01-為什麼需要DbCopy.md
+    - Chapter02-技術選型與架構總覽.md
+    - Chapter03-資料庫物件的抽象建模.md
+    - Chapter04-介面導向設計.md
+    - Chapter05-Dapper擴充方法與結構化日誌.md
+    - Chapter06-SQL-Server服務實作.md
+    - Chapter07-PostgreSQL服務實作.md
+    - Chapter08-RESTful-API設計.md
+    - Chapter09-單頁式Web介面.md
+    - Chapter10-CSS主題設計.md
+    - Chapter11-應用程式進入點.md
+    - Chapter12-跨平台建置與發佈.md
+    - Chapter13-安全性設計.md
+    - Chapter14-效能與可靠性.md
+    - Chapter15-四階段複製流程.md
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    number-sections: true
+    page-footer:
+      left: ""
+      center: "© 2026 向皓田"
+      right: ""
+  pdf:
+    pdf-engine: xelatex
+    documentclass: scrreprt
+    number-sections: true
+    geometry:
+      - top=30mm
+      - bottom=30mm
+      - left=25mm
+      - right=25mm
+    include-in-header:
+      text: |
+        \usepackage{xeCJK}
+        \setmainfont{Helvetica}
+        \setCJKmainfont{Noto Sans TC}
+        \usepackage{fancyhdr}
+        \pagestyle{fancy}
+        \fancyhf{}
+        \fancyhead[L]{\leftmark}
+        \fancyhead[R]{DbCopy：資料庫複製工具}
+        \fancyfoot[C]{\thepage}
+        \renewcommand{\headrulewidth}{0.4pt}
+        \fancypagestyle{plain}{
+          \fancyhf{}
+          \fancyfoot[C]{\thepage}
+          \renewcommand{\headrulewidth}{0pt}
+        }
+  epub:
+    title: "DbCopy：資料庫複製工具"
+    author: "向皓田"

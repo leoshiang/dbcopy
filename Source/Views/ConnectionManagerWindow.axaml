@@ -1,0 +1,76 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="using:DbCopy.Views"
+        x:Class="DbCopy.Views.ConnectionManagerWindow"
+        Title="管理連線" Width="700" Height="500"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+    <DockPanel>
+        <!-- Header -->
+        <Border DockPanel.Dock="Top" Background="#2563eb" Padding="16,10">
+            <Grid ColumnDefinitions="*,Auto,8,Auto">
+                <TextBlock Text="管理連線" Foreground="White" FontWeight="Bold" FontSize="14"
+                           VerticalAlignment="Center" />
+                <Button Grid.Column="1" Content="↓ 匯出" Click="OnExport"
+                        Background="White" Foreground="#2563eb" Padding="14,4"
+                        CornerRadius="12" FontSize="12" FontWeight="SemiBold"
+                        Width="80" />
+                <Button Grid.Column="3" Content="↑ 匯入" Click="OnImport"
+                        Background="White" Foreground="#2563eb" Padding="14,4"
+                        CornerRadius="12" FontSize="12" FontWeight="SemiBold"
+                        Width="80" />
+            </Grid>
+        </Border>
+
+        <!-- Footer -->
+        <Border DockPanel.Dock="Bottom" Padding="16,10" Background="#f9fafb"
+                BorderBrush="#e5e7eb" BorderThickness="0,1,0,0">
+            <Button Content="＋ 新增連線" Click="OnAddConnection"
+                    Background="#2563eb" Foreground="White" FontWeight="Bold"
+                    Padding="20,8" CornerRadius="16"
+                    HorizontalAlignment="Center" />
+        </Border>
+
+        <!-- Connection List -->
+        <ScrollViewer Padding="16,8">
+            <ItemsControl x:Name="ConnectionList">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="0,4" Padding="12,10" CornerRadius="8"
+                                Background="White" BorderBrush="#e5e7eb" BorderThickness="1"
+                                BoxShadow="0 1 3 0 #1a000000">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <StackPanel Spacing="4">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Border CornerRadius="4" Padding="6,2"
+                                                Background="{Binding Type, Converter={x:Static local:ConnectionManagerWindow.TypeToBgConverter}}">
+                                            <TextBlock Text="{Binding Type, Converter={x:Static local:ConnectionManagerWindow.TypeToLabelConverter}}"
+                                                       Foreground="White" FontSize="10" FontWeight="Bold" />
+                                        </Border>
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold"
+                                                   VerticalAlignment="Center" />
+                                        <Border IsVisible="{Binding ReadOnly}" Background="#f59e0b"
+                                                CornerRadius="4" Padding="6,1">
+                                            <TextBlock Text="🔒 唯讀" FontSize="10" Foreground="White" />
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding ConnectionString}"
+                                               Foreground="#6b7280" FontSize="11"
+                                               TextTrimming="CharacterEllipsis"
+                                               MaxLines="1" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4"
+                                            VerticalAlignment="Center">
+                                    <Button Content="✏️" Tag="{Binding Id}" Click="OnEditConnection"
+                                            Background="Transparent" Padding="6,4" />
+                                    <Button Content="🗑" Tag="{Binding Id}" Click="OnDeleteConnection"
+                                            Background="Transparent" Foreground="#dc2626" Padding="6,4" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
+</Window>

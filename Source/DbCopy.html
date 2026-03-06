@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>DbCopy - 資料庫複製工具</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Fira+Code:wght@400;500&display=swap"
+          rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1d4ed8;
+            --accent-color: #7c3aed;
+            --dark-bg: #1e1e1e;
+            --code-bg: #282c34;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .navbar {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            color: var(--primary-color) !important;
+            letter-spacing: -1px;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #eef2ff 100%);
+            padding: 120px 0 100px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section h1 {
+            background: linear-gradient(to right, #2563eb, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .db-badge {
+            display: inline-block;
+            padding: 10px 28px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .feature-card {
+            border: none;
+            border-radius: 16px;
+            background: white;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .phase-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            height: 100%;
+        }
+
+        .phase-number {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0 auto 1rem;
+        }
+
+        .terminal {
+            background-color: var(--dark-bg);
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .terminal-header {
+            background-color: #2d2d2d;
+            padding: 12px 16px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background-color: #ff5f56; }
+        .dot.yellow { background-color: #ffbd2e; }
+        .dot.green { background-color: #27c93f; }
+
+        .terminal-body {
+            padding: 20px;
+            color: #d4d4d4;
+            font-size: 0.85rem;
+            line-height: 1.8;
+        }
+
+        .terminal-body .prompt { color: #27c93f; }
+        .terminal-body .command { color: #fff; }
+        .terminal-body .output { color: #9cdcfe; display: block; margin: 4px 0 12px; }
+        .terminal-body .comment { color: #6a9955; }
+
+        .accordion-item {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .accordion-button {
+            font-weight: 600;
+            background-color: #fff;
+            padding: 1.25rem;
+        }
+
+        .accordion-button:not(.collapsed) {
+            color: var(--primary-color);
+            background-color: #f8f9fa;
+            box-shadow: none;
+        }
+
+        .spec-table th {
+            width: 30%;
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .method-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            background-color: #ecfdf5;
+            color: #059669;
+        }
+
+        .code-block {
+            background-color: #f8f9fa;
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            border: 1px solid #e9ecef;
+            overflow-x: auto;
+            color: #334155;
+        }
+
+        .code-block .key { color: #2563eb; }
+        .code-block .string { color: #b45309; }
+        .code-block .number { color: #059669; }
+        .code-block .comment { color: #64748b; }
+        .code-block .prompt { color: #059669; }
+    </style>
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="#"><i class="bi bi-database me-2"></i>DbCopy</a>
+        <button class="navbar-toggler" data-bs-target="#navbarNav" data-bs-toggle="collapse" type="button">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div id="navbarNav" class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="#intro">簡介</a></li>
+                <li class="nav-item"><a class="nav-link" href="#features">核心功能</a></li>
+                <li class="nav-item"><a class="nav-link" href="#workflow">複製流程</a></li>
+                <li class="nav-item"><a class="nav-link" href="#api">API</a></li>
+                <li class="nav-item"><a class="nav-link" href="#specs">詳細規格</a></li>
+                <li class="nav-item ms-lg-3">
+                    <a class="btn btn-primary rounded-pill px-4" href="#download">下載</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<header id="intro" class="hero-section">
+    <div class="container text-center">
+        <div class="d-inline-block px-3 py-1 mb-3 rounded-pill bg-primary bg-opacity-10 text-primary fw-bold small">
+            .NET 10 | Self-contained
+        </div>
+        <h1 class="display-4 fw-bold mb-4">資料庫複製工具</h1>
+        <p class="lead text-secondary mb-4 mx-auto" style="max-width: 700px;">
+            基於 .NET 10 打造，提供 Web UI 與 REST API。
+            <br>支援 SQL Server 與 PostgreSQL 跨庫同步，單一執行檔即可運行。
+        </p>
+
+        <div class="d-flex justify-content-center gap-3 flex-wrap mb-5">
+            <div class="db-badge"><i class="bi bi-database-fill me-2"></i>SQL Server</div>
+            <div class="db-badge"><i class="bi bi-database-fill me-2"></i>PostgreSQL</div>
+        </div>
+
+        <div id="download" class="d-flex justify-content-center gap-3 flex-wrap">
+            <a class="btn btn-primary btn-lg rounded-pill px-4" href="https://github.com/leoshiang/DbCopy/releases/latest" data-rid="win-x64">
+                <i class="bi bi-windows me-1"></i> Windows (x64)
+            </a>
+            <a class="btn btn-outline-secondary rounded-pill px-4" href="https://github.com/leoshiang/DbCopy/releases/latest" data-rid="linux-x64">
+                Linux (x64)
+            </a>
+            <a class="btn btn-outline-secondary rounded-pill px-4" href="https://github.com/leoshiang/DbCopy/releases/latest" data-rid="linux-arm64">
+                Linux (ARM64)
+            </a>
+            <a class="btn btn-outline-secondary rounded-pill px-4" href="https://github.com/leoshiang/DbCopy/releases/latest" data-rid="osx-x64">
+                macOS (x64)
+            </a>
+            <a class="btn btn-outline-secondary rounded-pill px-4" href="https://github.com/leoshiang/DbCopy/releases/latest" data-rid="osx-arm64">
+                macOS (Apple Silicon)
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- Terminal Demo -->
+<section class="py-5">
+    <div class="container">
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+            </div>
+            <div class="terminal-body">
+                <div><span class="comment">// 啟動 DbCopy 伺服器</span></div>
+                <div><span class="prompt">user@dev:~$ </span><span class="command">./DbCopy</span></div>
+                <span class="output">
+                    info: DbCopy[0]<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;Now listening on: http://localhost:5281<br>
+                    info: DbCopy[0]<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;Application started. Press Ctrl+C to shut down.
+                </span>
+                <div><span class="comment">// 使用 API 測試連線</span></div>
+                <div><span class="prompt">user@dev:~$ </span><span class="command">curl -X POST http://localhost:5281/api/db/test \</span></div>
+                <div><span class="command">&nbsp;&nbsp;-H "Content-Type: application/json" \</span></div>
+                <div><span class="command">&nbsp;&nbsp;-d '{"type": 0, "connectionString": "Server=..."}'</span></div>
+                <span class="output">{"success": true}</span>
+                <div><span class="prompt">user@dev:~$ </span><span class="command">_</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="mb-3">核心功能</h2>
+            <p class="text-muted">一站式資料庫複製解決方案</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-browser-chrome"></i></div>
+                    <h4>Web UI 操作介面</h4>
+                    <p class="text-muted">內建 Razor Pages 網頁介面，透過瀏覽器即可完成資料庫比對與複製，操作直覺簡單。</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-braces"></i></div>
+                    <h4>REST API</h4>
+                    <p class="text-muted">完整的 RESTful API 端點，可整合至 CI/CD 流程或自動化腳本，實現程式化操作。</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-arrow-left-right"></i></div>
+                    <h4>結構比對</h4>
+                    <p class="text-muted">自動比對來源與目標資料庫的結構差異，識別缺少的資料表、檢視、預存程序等物件。</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-layers"></i></div>
+                    <h4>四階段複製</h4>
+                    <p class="text-muted">結構建立、資料搬移、索引建立、外鍵約束，分階段執行確保資料完整性與正確性。</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-file-earmark-binary"></i></div>
+                    <h4>單一執行檔</h4>
+                    <p class="text-muted">發布為 Self-contained 單一檔案，內建壓縮，無需安裝 .NET Runtime 即可執行。</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-pc-display-horizontal"></i></div>
+                    <h4>跨平台支援</h4>
+                    <p class="text-muted">原生支援 Windows、Linux (x64/ARM64)、macOS (Intel/Apple Silicon)，一次編譯到處執行。</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-diagram-3"></i></div>
+                    <h4>相依性解析</h4>
+                    <p class="text-muted">自動分析物件之間的相依關係，決定正確的建立順序，避免建立失敗。</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-journal-text"></i></div>
+                    <h4>完整日誌</h4>
+                    <p class="text-muted">採用 Serilog 結構化日誌，記錄每一條 SQL 語句，方便除錯與稽核。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Workflow Section -->
+<section id="workflow" class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="mb-3">四階段複製流程</h2>
+            <p class="text-muted">確保結構與資料的完整遷移</p>
+        </div>
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-3">
+                <div class="phase-card">
+                    <div class="phase-number">1</div>
+                    <h5>結構建立</h5>
+                    <p class="text-muted small">建立資料表結構、欄位定義、主鍵與約束條件。</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="phase-card">
+                    <div class="phase-number">2</div>
+                    <h5>資料搬移</h5>
+                    <p class="text-muted small">使用 Bulk Copy 高效搬移資料，支援批次處理。</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="phase-card">
+                    <div class="phase-number">3</div>
+                    <h5>索引建立</h5>
+                    <p class="text-muted small">建立次要索引，提升查詢效能。</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="phase-card">
+                    <div class="phase-number">4</div>
+                    <h5>外鍵約束</h5>
+                    <p class="text-muted small">加入外鍵約束，確保參考完整性。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- API Section -->
+<section id="api" class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="mb-3">REST API</h2>
+            <p class="text-muted">完整的 RESTful 端點，支援程式化操作</p>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="table-responsive">
+                    <table class="table table-bordered bg-white" style="border-radius: 8px; overflow: hidden;">
+                        <thead>
+                            <tr>
+                                <th class="bg-primary bg-opacity-10 text-primary fw-bold">端點</th>
+                                <th class="bg-primary bg-opacity-10 text-primary fw-bold">方法</th>
+                                <th class="bg-primary bg-opacity-10 text-primary fw-bold">說明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>/api/db/test</code></td>
+                                <td><span class="method-badge">POST</span></td>
+                                <td>測試資料庫連線是否正常</td>
+                            </tr>
+                            <tr>
+                                <td><code>/api/db/objects</code></td>
+                                <td><span class="method-badge">POST</span></td>
+                                <td>取得資料庫物件清單（資料表、檢視、預存程序等）</td>
+                            </tr>
+                            <tr>
+                                <td><code>/api/db/compare</code></td>
+                                <td><span class="method-badge">POST</span></td>
+                                <td>比對來源與目標資料庫結構差異</td>
+                            </tr>
+                            <tr>
+                                <td><code>/api/db/copy</code></td>
+                                <td><span class="method-badge">POST</span></td>
+                                <td>執行物件與資料複製</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Specification Section -->
+<section id="specs" class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="mb-3">詳細規格</h2>
+            <p class="text-muted">使用教學與技術規格</p>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div id="specAccordion" class="accordion">
+                    <!-- 啟動服務 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" data-bs-target="#collapseStart" data-bs-toggle="collapse" type="button">
+                                1. 啟動服務
+                            </button>
+                        </h2>
+                        <div id="collapseStart" class="accordion-collapse collapse show" data-bs-parent="#specAccordion">
+                            <div class="accordion-body">
+                                <p>執行 DbCopy 後，開啟瀏覽器即可使用 Web UI。</p>
+                                <div class="code-block">
+                                    <span class="prompt">$</span> ./DbCopy<br>
+                                    <span class="comment">// 瀏覽器開啟 http://localhost:5281</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 測試連線 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" data-bs-target="#collapseTest" data-bs-toggle="collapse" type="button">
+                                2. 測試連線
+                            </button>
+                        </h2>
+                        <div id="collapseTest" class="accordion-collapse collapse" data-bs-parent="#specAccordion">
+                            <div class="accordion-body">
+                                <p>透過 API 測試資料庫連線。</p>
+                                <div class="code-block">
+                                    <span class="prompt">$</span> curl -X POST http://localhost:5281/api/db/test \<br>
+                                    &nbsp;&nbsp;-H "<span class="key">Content-Type</span>: <span class="string">application/json</span>" \<br>
+                                    &nbsp;&nbsp;-d '{<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;"<span class="key">type</span>": <span class="number">0</span>,<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;"<span class="key">connectionString</span>": "<span class="string">Server=localhost;Database=MyDb;Trusted_Connection=true;</span>"<br>
+                                    &nbsp;&nbsp;}'
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 取得物件 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" data-bs-target="#collapseObjects" data-bs-toggle="collapse" type="button">
+                                3. 取得資料庫物件
+                            </button>
+                        </h2>
+                        <div id="collapseObjects" class="accordion-collapse collapse" data-bs-parent="#specAccordion">
+                            <div class="accordion-body">
+                                <p>列出資料庫中的所有物件。</p>
+                                <div class="code-block">
+                                    <span class="prompt">$</span> curl -X POST http://localhost:5281/api/db/objects \<br>
+                                    &nbsp;&nbsp;-H "<span class="key">Content-Type</span>: <span class="string">application/json</span>" \<br>
+                                    &nbsp;&nbsp;-d '{<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;"<span class="key">type</span>": <span class="number">0</span>,<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;"<span class="key">connectionString</span>": "<span class="string">Server=localhost;Database=MyDb;Trusted_Connection=true;</span>"<br>
+                                    &nbsp;&nbsp;}'
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 比對資料庫 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" data-bs-target="#collapseCompare" data-bs-toggle="collapse" type="button">
+                                4. 比對資料庫
+                            </button>
+                        </h2>
+                        <div id="collapseCompare" class="accordion-collapse collapse" data-bs-parent="#specAccordion">
+                            <div class="accordion-body">
+                                <p>比對來源與目標資料庫，找出差異。</p>
+                                <div class="code-block">
+                                    <span class="prompt">$</span> curl -X POST http://localhost:5281/api/db/compare \<br>
+                                    &nbsp;&nbsp;-H "<span class="key">Content-Type</span>: <span class="string">application/json</span>" \<br>
+                                    &nbsp;&nbsp;-d '{<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;"<span class="key">source</span>": { "<span class="key">type</span>": <span class="number">0</span>, "<span class="key">connectionString</span>": "<span class="string">...</span>" },<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;"<span class="key">target</span>": { "<span class="key">type</span>": <span class="number">0</span>, "<span class="key">connectionString</span>": "<span class="string">...</span>" }<br>
+                                    &nbsp;&nbsp;}'
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 執行複製 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" data-bs-target="#collapseCopy" data-bs-toggle="collapse" type="button">
+                                5. 執行複製
+                            </button>
+                        </h2>
+                        <div id="collapseCopy" class="accordion-collapse collapse" data-bs-parent="#specAccordion">
+                            <div class="accordion-body">
+                                <p>將指定物件從來源複製到目標資料庫。Phase 0 表示執行全部階段。</p>
+                                <div class="code-block">
+                                    <span class="prompt">$</span> curl -X POST http://localhost:5281/api/db/copy \<br>
+                                    &nbsp;&nbsp;-H "<span class="key">Content-Type</span>: <span class="string">application/json</span>" \<br>
+                                    &nbsp;&nbsp;-d '{<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;"<span class="key">source</span>": { "<span class="key">type</span>": <span class="number">0</span>, "<span class="key">connectionString</span>": "<span class="string">...</span>" },<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;"<span class="key">target</span>": { "<span class="key">type</span>": <span class="number">0</span>, "<span class="key">connectionString</span>": "<span class="string">...</span>" },<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;"<span class="key">object</span>": { "<span class="key">schema</span>": "<span class="string">dbo</span>", "<span class="key">name</span>": "<span class="string">Users</span>", "<span class="key">type</span>": "<span class="string">Table</span>" },<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;"<span class="key">phase</span>": <span class="number">0</span>,<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;"<span class="key">batchSize</span>": <span class="number">1000</span><br>
+                                    &nbsp;&nbsp;}'
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 發布 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" data-bs-target="#collapsePublish" data-bs-toggle="collapse" type="button">
+                                6. 發布多平台版本
+                            </button>
+                        </h2>
+                        <div id="collapsePublish" class="accordion-collapse collapse" data-bs-parent="#specAccordion">
+                            <div class="accordion-body">
+                                <p>執行 <code>publish.sh</code> 可輸出 Windows/macOS/Linux 到 <code>publish/</code> 目錄。</p>
+                                <div class="code-block">
+                                    <span class="prompt">$</span> ./publish.sh
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-dark text-white py-4">
+    <div class="container text-center">
+        <p class="mb-1">&copy; 2025 DbCopy Project. All rights reserved.</p>
+        <p class="text-secondary small mb-0">
+            <a href="https://github.com/leoshiang/DbCopy.git" class="text-secondary text-decoration-none">
+                <i class="bi bi-github me-1"></i>GitHub
+            </a>
+        </p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    (async function bindReleaseAssets() {
+        const fallback = "https://github.com/leoshiang/DbCopy/releases/latest";
+        try {
+            const response = await fetch("https://api.github.com/repos/leoshiang/DbCopy/releases/latest", {
+                headers: {"Accept": "application/vnd.github+json"}
+            });
+            if (!response.ok) return;
+
+            const release = await response.json();
+            const assets = Array.isArray(release.assets) ? release.assets : [];
+            const links = document.querySelectorAll("a[data-rid]");
+
+            for (const link of links) {
+                const rid = (link.getAttribute("data-rid") || "").toLowerCase();
+                const matched = assets.find(a => {
+                    const name = String(a.name || "").toLowerCase();
+                    return name.includes(rid);
+                });
+
+                link.href = matched?.browser_download_url || fallback;
+                if (matched?.name) {
+                    link.title = matched.name;
+                }
+            }
+        } catch (_) {
+            // keep fallback links
+        }
+    })();
+</script>
+</body>
+</html>
